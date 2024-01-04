@@ -70,7 +70,7 @@ main_screen.onkeypress(go_down, "Down")
 main_screen.onkeypress(go_left, "Left")
 main_screen.onkeypress(go_right, "Right")
 
-
+tails = []
 while True:
     scoreboard.clear()
     scoreboard.write(f"Score:{score}", font=("arial",22), align="center")
@@ -78,6 +78,24 @@ while True:
     if snake_head.distance(snake_food) < 20:
         change_position(snake_food)
         score += 1
+        new_tail = create_turtle("square", "darkgreen")
+        tails.append(new_tail)
+
+    for i in range(len(tails) - 1, 0, -1):
+        x = tails[i-1].xcor()
+        y = tails[i-1].ycor()
+        tails[i].goto(x,y)
+
+    if len(tails):
+        tails[0].goto(snake_head.xcor(), snake_head.ycor())
+
+    if snake_head.xcor() > 290 or snake_head.xcor() < -290:
+        snake_head.setx(-1 * snake_head.xcor())
+
+    if snake_head.ycor() > 240:
+        snake_head.sety(-290)
+    if snake_head.ycor() < -290:
+        snake_head.sety(240)
         
     move()
     sleep(0.2)
