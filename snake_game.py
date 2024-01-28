@@ -1,7 +1,7 @@
 import turtle
 import random
 from time import sleep
-
+import os
 
 
 main_screen = turtle.Screen()
@@ -41,16 +41,20 @@ def move():
         snake_head.setx(x)
 
 def go_up():
-    snake_head.direction = "up"
+    if snake_head.direction != "down":
+        snake_head.direction = "up"
 
 def go_down():
-    snake_head.direction = "down"
+    if snake_head.direction != "up":
+        snake_head.direction = "down"
 
 def go_left():
-    snake_head.direction = "left"
+    if snake_head.direction != "right":
+        snake_head.direction = "left"
 
 def go_right():
-    snake_head.direction = "right"
+    if snake_head.direction != "left":
+        snake_head.direction = "right"
 
 snake_head = create_turtle("square", "green")
 snake_head.direction = ""
@@ -60,6 +64,11 @@ change_position(snake_food)
 
 
 score = 0
+if os.path.exists("score.txt"):
+    f = open("score.txt", "r")
+    highscore = int(f.read())
+else:
+    highscore = 0
 scoreboard = create_turtle("square", "white")
 scoreboard.goto(0, 260)
 scoreboard.ht()
@@ -70,14 +79,28 @@ main_screen.onkeypress(go_down, "Down")
 main_screen.onkeypress(go_left, "Left")
 main_screen.onkeypress(go_right, "Right")
 
+def on_close():
+    f = open("score.txt", "w")
+    f.write(str(highscore))
+    f.close()
+    global running
+    running = False
+
+root = main_screen._root
+root.protocol("WM_DELETE_WINDOW", on_close)
+
+
 tails = []
-while True:
+running = True
+while running:
     scoreboard.clear()
-    scoreboard.write(f"Score:{score}", font=("arial",22), align="center")
+    scoreboard.write(f"Score:{score}, HighScore:{highscore}", font=("arial",22), align="center")
     main_screen.update()
     if snake_head.distance(snake_food) < 20:
         change_position(snake_food)
         score += 1
+        if score > highscore:
+            highscore = score
         new_tail = create_turtle("square", "darkgreen")
         tails.append(new_tail)
 
@@ -98,4 +121,13 @@ while True:
         snake_head.sety(240)
         
     move()
+
+    for t in tails:
+        if t.distance(snake_head) < 20:
+            snake_head.goto(0,0)
+            score = 0
+            snake_head.direction = ""
+            for t in tails:
+                t.ht()
+            tails = []
     sleep(0.2)
